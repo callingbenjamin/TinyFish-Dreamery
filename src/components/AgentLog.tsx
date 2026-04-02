@@ -1,5 +1,10 @@
+export interface LogEntry {
+  msg: string;
+  time: string;
+}
+
 interface AgentLogProps {
-  logs: string[];
+  logs: LogEntry[];
   isSearching: boolean;
 }
 
@@ -29,28 +34,21 @@ export function AgentLog({ logs, isSearching }: AgentLogProps) {
             Agent standby. Awaiting parameters...
           </p>
         ) : (
-          logs.map((log, i) => (
+          logs.map((entry, i) => (
             <div key={i} className="flex gap-2">
-              <span className="text-slate-600 shrink-0">
-                {new Date().toLocaleTimeString([], {
-                  hour12: false,
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                })}
-              </span>
+              <span className="text-slate-600 shrink-0">{entry.time}</span>
               <span
                 className={
-                  log.startsWith("[ERROR]")
+                  entry.msg.startsWith("[ERROR]")
                     ? "text-red-400"
-                    : log.startsWith("[SUCCESS]") || log.startsWith("[DREAMERY]")
+                    : entry.msg.startsWith("[SUCCESS]") || entry.msg.startsWith("[DREAMERY]")
                     ? "text-emerald-300"
-                    : log.startsWith("[SYSTEM]")
+                    : entry.msg.startsWith("[SYSTEM]")
                     ? "text-slate-400"
                     : "text-emerald-500"
                 }
               >
-                {log}
+                {entry.msg}
               </span>
             </div>
           ))

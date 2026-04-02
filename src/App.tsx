@@ -2,36 +2,53 @@ import { useState, useRef } from "react";
 import { SearchForm } from "./components/SearchForm";
 import { ResultsPanel } from "./components/ResultsPanel";
 import { SummaryPanel } from "./components/SummaryPanel";
-import { AgentLog } from "./components/AgentLog";
+import { AgentLog, type LogEntry } from "./components/AgentLog";
 import { findDeals } from "./api";
 import type { SearchFilters, DealFinderResponse } from "./types";
 
 const AGENT_STEPS = [
   { delay: 0, msg: "[SYSTEM] Initializing TinyFish session..." },
-  { delay: 800, msg: "[AGENT] Navigating to Realtor.com..." },
-  { delay: 2000, msg: "[AGENT] Entering search: {city}, {state}" },
-  { delay: 3200, msg: "[AGENT] Applying filters — max ${maxPrice}, {minBeds}+ beds" },
-  { delay: 4500, msg: "[AGENT] Page loaded. Scanning search results..." },
-  { delay: 5800, msg: "[AGENT] Extracting listing details from result cards..." },
-  { delay: 7200, msg: "[AGENT] Checking for price reduction badges..." },
-  { delay: 8500, msg: "[AGENT] Reading days-on-market indicators..." },
-  { delay: 10000, msg: "[AGENT] Clicking into top listings for detail extraction..." },
-  { delay: 11500, msg: "[AGENT] Normalizing extracted data to JSON..." },
+  { delay: 1500, msg: "[AGENT] Launching stealth browser..." },
+  { delay: 4000, msg: "[AGENT] Navigating to listing site..." },
+  { delay: 8000, msg: "[AGENT] Entering search: {city}, {state}" },
+  { delay: 14000, msg: "[AGENT] Applying filters — max {maxPrice}, {minBeds}+ beds" },
+  { delay: 22000, msg: "[AGENT] Page loaded. Scanning search results..." },
+  { delay: 35000, msg: "[AGENT] Extracting listing details from result cards..." },
+  { delay: 50000, msg: "[AGENT] Checking for price reduction badges..." },
+  { delay: 65000, msg: "[AGENT] Reading days-on-market indicators..." },
+  { delay: 85000, msg: "[AGENT] Clicking into individual listings for details..." },
+  { delay: 110000, msg: "[AGENT] Extracting property data from detail pages..." },
+  { delay: 140000, msg: "[AGENT] Cross-referencing pricing data..." },
+  { delay: 170000, msg: "[AGENT] Normalizing extracted data to JSON..." },
+  { delay: 200000, msg: "[AGENT] Finalizing extraction..." },
 ];
+
+function now(): string {
+  return new Date().toLocaleTimeString([], {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function logEntry(msg: string): LogEntry {
+  return { msg, time: now() };
+}
 
 function interpolateStep(msg: string, filters: SearchFilters): string {
   return msg
-    .replace("{city}", filters.city)
-    .replace("{state}", filters.state)
-    .replace("{maxPrice}", filters.maxPrice.toLocaleString())
-    .replace("{minBeds}", String(filters.minBeds));
+    .replace("{city}", filters.city || "")
+    .replace("{state}", filters.state || "")
+    .replace("{maxPrice}", `$${Number(filters.maxPrice).toLocaleString()}`)
+    .replace("{minBeds}", String(filters.minBeds || ""));
 }
 
 export default function App() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<DealFinderResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [logs, setLogs] = useState<string[]>([]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   async function handleSearch(filters: SearchFilters) {
@@ -44,27 +61,33 @@ export default function App() {
     timersRef.current.forEach(clearTimeout);
     timersRef.current = AGENT_STEPS.map(({ delay, msg }) =>
       setTimeout(
-        () => setLogs((prev) => [...prev, interpolateStep(msg, filters)]),
+        () =>
+          setLogs((prev) => [
+            ...prev,
+            logEntry(interpolateStep(msg, filters)),
+          ]),
         delay
       )
     );
 
     try {
       const data = await findDeals(filters);
-      // Final success logs
       setLogs((prev) => [
         ...prev,
-        `[SUCCESS] Extracted ${data.listings.length} properties.`,
-        "[DREAMERY] Applying Opportunity Scoring...",
-        `[DREAMERY] ${data.listings.filter((l) => l.label === "Strong lead").length} strong leads identified.`,
+        logEntry(`[SUCCESS] Extracted ${data.listings.length} properties.`),
+        logEntry("[DREAMERY] Applying Opportunity Scoring..."),
+        logEntry(
+          `[DREAMERY] ${data.listings.filter((l) => l.label === "Strong lead").length} strong leads identified.`
+        ),
       ]);
-      // Brief pause so the user sees the final logs before results appear
       await new Promise((r) => setTimeout(r, 800));
       setResults(data);
     } catch (e: any) {
       setLogs((prev) => [
         ...prev,
-        `[ERROR] ${e.message || "Agent timed out or request failed."}`,
+        logEntry(
+          `[ERROR] ${e.message || "Agent timed out or request failed."}`
+        ),
       ]);
       setError(e.message || "Something went wrong");
     } finally {

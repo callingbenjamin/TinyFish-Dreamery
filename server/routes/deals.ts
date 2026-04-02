@@ -14,21 +14,32 @@ dealsRouter.post("/find-deals", async (req, res) => {
       return;
     }
 
-    const useMock = !process.env.TINYFISH_API_KEY;
+    const hasKey = !!process.env.TINYFISH_API_KEY;
     let rawListings;
+    let source: "tinyfish" | "mock" = "mock";
 
-    if (useMock) {
-      // Simulate agent delay for demo
-      await new Promise((r) => setTimeout(r, 4000));
+    if (hasKey) {
+      try {
+        rawListings = await searchWithTinyFish({
+          city,
+          state,
+          maxPrice,
+          minBeds,
+          keyword,
+        });
+        source = "tinyfish";
+      } catch (err: any) {
+        console.warn("[find-deals] TinyFish failed, falling back to mock:", err.message);
+        // Fall back to mock on any TinyFish error
+        rawListings = null;
+      }
+    }
+
+    if (!rawListings) {
+      // Mock mode — simulate agent delay for demo
+      await new Promise((r) => setTimeout(r, 15000));
       rawListings = getMockListings({ city, state, maxPrice, minBeds, keyword });
-    } else {
-      rawListings = await searchWithTinyFish({
-        city,
-        state,
-        maxPrice,
-        minBeds,
-        keyword,
-      });
+      source = "mock";
     }
 
     const scored = scoreListings(rawListings);
@@ -38,7 +49,7 @@ dealsRouter.post("/find-deals", async (req, res) => {
       listings: scored,
       summary,
       meta: {
-        source: useMock ? "mock" : "tinyfish",
+        source,
         searchedAt: new Date().toISOString(),
         totalFound: scored.length,
       },

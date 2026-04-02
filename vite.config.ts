@@ -9,6 +9,7 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:3001",
         changeOrigin: true,
+        timeout: 300000, // 5 minutes — TinyFish agents can take 1-2 min
       },
     },
   },
