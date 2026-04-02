@@ -29,30 +29,44 @@ export function scoreListings(listings: Listing[]): ScoredListing[] {
       let score = 50; // baseline
       const reasons: string[] = [];
 
-      // Price reduction signal (up to +25)
+      // Price reduction signal (+20 flat — the "wedge")
       if (listing.priceReduction && listing.priceReduction > 0) {
-        const reductionPct = listing.priceReduction / listing.price;
-        score += Math.min(25, Math.round(reductionPct * 500));
+        score += 20;
         reasons.push(
           `Price reduced $${listing.priceReduction.toLocaleString()}`
         );
       }
 
-      // Days on market signal (up to +20)
-      if (listing.daysOnMarket !== null && listing.daysOnMarket > 21) {
-        const domBonus = Math.min(20, Math.round((listing.daysOnMarket - 21) / 3));
-        score += domBonus;
-        reasons.push(`${listing.daysOnMarket} days on market — seller may be motivated`);
+      // Stale listing tiers — motivated sellers (+15 / +25)
+      if (listing.daysOnMarket !== null) {
+        if (listing.daysOnMarket > 60) {
+          score += 25;
+          reasons.push(`${listing.daysOnMarket}d on market — likely motivated seller`);
+        } else if (listing.daysOnMarket > 30) {
+          score += 15;
+          reasons.push(`${listing.daysOnMarket}d on market — seller may be motivated`);
+        }
       }
 
-      // Below-average price signal (up to +15)
+      // Value density — price per sqft below $200 is a deal signal (+15)
+      if (listing.sqft && listing.sqft > 0) {
+        const pricePerSqft = listing.price / listing.sqft;
+        if (pricePerSqft < 200) {
+          score += 15;
+          reasons.push(
+            `$${Math.round(pricePerSqft)}/sqft — strong value density`
+          );
+        }
+      }
+
+      // Below-average price relative to batch (+10)
       if (listing.price < avgPrice) {
         const priceDelta = (avgPrice - listing.price) / priceRange;
-        score += Math.min(15, Math.round(priceDelta * 30));
+        score += Math.min(10, Math.round(priceDelta * 20));
         reasons.push("Priced below batch average");
       }
 
-      // Interesting notes from agent
+      // Agent notes
       if (listing.notes) {
         reasons.push(listing.notes);
       }
@@ -60,9 +74,9 @@ export function scoreListings(listings: Listing[]): ScoredListing[] {
       score = Math.max(0, Math.min(100, score));
 
       const label: ScoredListing["label"] =
-        score >= 75
+        score >= 80
           ? "Strong lead"
-          : score >= 55
+          : score >= 60
           ? "Worth reviewing"
           : "Low priority";
 

@@ -16,6 +16,8 @@ Most real estate data lives behind websites with no API.
 
 So I built Dreamery Deal Finder — an agent that navigates listing sites like a human would, extracts structured data, and surfaces overlooked deals.
 
+We used the TinyFish Web Agent to handle the dynamic navigation of Zillow's SPA — something standard scrapers can't touch. Then we layered our Dreamery scoring engine on top.
+
 Powered by @tinyfishai Web Agent. Built for their Accelerator.
 
 [link to demo]
@@ -29,7 +31,7 @@ Shipped a real estate deal finder built on @tinyfishai:
 - Extracts 15+ listings as structured JSON
 - Scoring engine labels Strong Leads / Worth Reviewing / Low Priority
 
-No scraping. No APIs. Just web agent automation.
+No scraping. No APIs. Just web agent automation on dynamic SPAs that standard tools can't touch.
 
 Code: [GitHub link]
 Demo: [video link]
