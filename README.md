@@ -83,4 +83,4 @@ src/
 
 ## How to Demo (2 minutes)
 
-See [DEMO_SCRIPT.md](DEMO_SCRIPT.md) for a step-by-step walkthrough.
+DEMO_SCRIPT.md for a step-by-step walkthrough.
