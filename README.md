@@ -81,6 +81,6 @@ src/
     SummaryPanel.tsx    — Agent summary + top picks
 ```
 
-## How to Demo (2 minutes)
+## Demo (2 minutes)
 
 DEMO_SCRIPT.md for a step-by-step walkthrough.
