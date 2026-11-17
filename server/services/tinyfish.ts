@@ -98,6 +98,9 @@ export async function searchWithTinyFish(
   console.log("[TinyFish] Starting agent...");
   console.log("[TinyFish] URL:", startUrl);
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8 * 60 * 1000); // 8 min timeout
+
   const response = await fetch(apiUrl, {
     method: "POST",
     headers: {
@@ -109,6 +112,7 @@ export async function searchWithTinyFish(
       goal,
       browser_profile: "stealth",
     }),
+    signal: controller.signal,
   });
 
   if (!response.ok) {
@@ -158,6 +162,8 @@ export async function searchWithTinyFish(
       }
     }
   }
+
+  clearTimeout(timeout);
 
   if (!result) {
     throw new Error("TinyFish agent did not return a result");

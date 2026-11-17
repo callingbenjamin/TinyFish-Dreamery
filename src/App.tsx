@@ -106,12 +106,9 @@ export default function App() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-dreamery-50">
       {/* Header */}
       <header className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-dreamery-600 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">D</span>
-            </div>
-            <span className="font-semibold text-gray-900">Dreamery</span>
+        <div className="max-w-6xl mx-auto px-6 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-3 h-10 overflow-hidden">
+            <img src="/5-removebg-preview.png" alt="dreamery.com" className="h-20 max-w-none" />
           </div>
           {(results || error) && (
             <button
@@ -128,8 +125,9 @@ export default function App() {
         {/* Hero / Search Section */}
         {!results && !loading && !error && (
           <div className="max-w-2xl mx-auto text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-3 tracking-tight">
-              Deal Finder
+            <h1 className="text-4xl font-bold text-gray-900 mb-3 tracking-tight flex items-end justify-center gap-3">
+              <img src="/logo.png" alt="Dreamery" className="h-48" />
+              <span className="mb-16">Deal Finder</span>
             </h1>
             <p className="text-lg text-gray-500 mb-2">
               Find potentially overlooked real estate deals from live listing
@@ -199,9 +197,6 @@ export default function App() {
         Dreamery Deal Finder &middot; Powered by{" "}
         <span className="font-medium text-dreamery-500">TinyFish</span> Web
         Agent
-        {results?.meta.source === "mock" && (
-          <span className="ml-2 text-amber-500">(Mock Mode)</span>
-        )}
       </footer>
     </div>
   );

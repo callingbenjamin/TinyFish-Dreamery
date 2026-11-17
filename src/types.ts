@@ -31,7 +31,7 @@ export interface DealFinderResponse {
     whyTheseStandOut: string;
   };
   meta: {
-    source: "tinyfish" | "mock";
+    source: "tinyfish";
     searchedAt: string;
     totalFound: number;
   };

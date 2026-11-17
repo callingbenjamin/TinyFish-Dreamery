@@ -13,16 +13,9 @@ export function SummaryPanel({ summary, meta }: Props) {
         <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
           Agent Summary
         </span>
-        {meta.source === "mock" && (
-          <span className="ml-auto text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full border border-amber-200">
-            Mock Mode
-          </span>
-        )}
-        {meta.source === "tinyfish" && (
-          <span className="ml-auto text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full border border-green-200">
-            Live via TinyFish
-          </span>
-        )}
+        <span className="ml-auto text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full border border-green-200">
+          Live via TinyFish
+        </span>
       </div>
 
       <h3 className="font-semibold text-gray-900 mb-3">Top Opportunities</h3>

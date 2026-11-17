@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { searchWithTinyFish } from "../services/tinyfish.js";
 import { scoreListings, generateSummary } from "../services/scoring.js";
-import { getMockListings } from "../mock/austin-listings.js";
 
 export const dealsRouter = Router();
 
@@ -14,33 +13,13 @@ dealsRouter.post("/find-deals", async (req, res) => {
       return;
     }
 
-    const hasKey = !!process.env.TINYFISH_API_KEY;
-    let rawListings;
-    let source: "tinyfish" | "mock" = "mock";
-
-    if (hasKey) {
-      try {
-        rawListings = await searchWithTinyFish({
-          city,
-          state,
-          maxPrice,
-          minBeds,
-          keyword,
-        });
-        source = "tinyfish";
-      } catch (err: any) {
-        console.warn("[find-deals] TinyFish failed, falling back to mock:", err.message);
-        // Fall back to mock on any TinyFish error
-        rawListings = null;
-      }
-    }
-
-    if (!rawListings) {
-      // Mock mode — simulate agent delay for demo
-      await new Promise((r) => setTimeout(r, 15000));
-      rawListings = getMockListings({ city, state, maxPrice, minBeds, keyword });
-      source = "mock";
-    }
+    const rawListings = await searchWithTinyFish({
+      city,
+      state,
+      maxPrice,
+      minBeds,
+      keyword,
+    });
 
     const scored = scoreListings(rawListings);
     const summary = generateSummary(scored);
@@ -49,7 +28,7 @@ dealsRouter.post("/find-deals", async (req, res) => {
       listings: scored,
       summary,
       meta: {
-        source,
+        source: "tinyfish",
         searchedAt: new Date().toISOString(),
         totalFound: scored.length,
       },

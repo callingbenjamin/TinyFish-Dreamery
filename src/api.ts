@@ -4,7 +4,7 @@ export async function findDeals(
   filters: SearchFilters
 ): Promise<DealFinderResponse> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 300000); // 5 min
+  const timeout = setTimeout(() => controller.abort(), 600000); // 10 min
 
   try {
     const res = await fetch("/api/find-deals", {
